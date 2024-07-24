@@ -145,7 +145,7 @@ class Order(models.Model):
         on_delete=models.CASCADE,
     )
 
-    dt = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     state = models.CharField(
         verbose_name="Статус", choices=STATE_CHOICES, max_length=15
     )
@@ -156,7 +156,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Список заказ"
-        ordering = ("-dt",)
+        ordering = ("-created_at",)
 
     def __str__(self):
         return str(self.dt)
