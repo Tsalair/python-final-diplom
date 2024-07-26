@@ -51,7 +51,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=80, verbose_name="Название")
+    name = models.CharField(verbose_name="Название", max_length=80, unique=True)
     category = models.ForeignKey(
         Category,
         verbose_name="Категория",
@@ -94,13 +94,13 @@ class ProductInfo(models.Model):
         verbose_name_plural = "Информационный список о продуктах"
         constraints = [
             models.UniqueConstraint(
-                fields=["product", "shop", "external_id"], name="unique_product_info"
+                fields=["shop", "external_id"], name="unique_product_info"
             ),
         ]
 
 
 class Parameter(models.Model):
-    name = models.CharField(max_length=40, verbose_name="Название")
+    name = models.CharField(verbose_name="Название", max_length=40, unique=True)
 
     class Meta:
         verbose_name = "Имя параметра"

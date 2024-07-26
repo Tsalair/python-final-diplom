@@ -67,7 +67,7 @@ class User(AbstractUser):
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=5, default='buyer')
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return self.email
 
     class Meta:
         verbose_name = 'Пользователь'
