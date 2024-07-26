@@ -3,6 +3,7 @@ import yaml
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.http import JsonResponse
+from rest_framework import generics
 from rest_framework.views import APIView
 
 from .models import (
@@ -10,9 +11,10 @@ from .models import (
     Parameter,
     Product,
     ProductInfo,
-    Shop,
     ProductInfoParameter,
+    Shop,
 )
+from .serializers import ShopSerializer
 
 
 class PartnerUpdate(APIView):
@@ -42,7 +44,7 @@ class PartnerUpdate(APIView):
             validate_url(url)
         except ValidationError as e:
             return JsonResponse({"Status": False, "Error": str(e)})
-        
+
         stream = requests.get(url).content
 
         data = yaml.safe_load(stream)
@@ -83,3 +85,8 @@ class PartnerUpdate(APIView):
                 )
 
         return JsonResponse({"Status": True})
+
+
+class ShopList(generics.ListAPIView):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
