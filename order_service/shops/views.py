@@ -14,7 +14,8 @@ from .models import (
     ProductInfoParameter,
     Shop,
 )
-from .serializers import ShopSerializer, ProductInfoSerializer
+from .permissions import IsShop
+from .serializers import ProductInfoSerializer, ShopSerializer
 
 
 class PartnerUpdate(APIView):
@@ -22,17 +23,9 @@ class PartnerUpdate(APIView):
     Класс для обновления прайса от поставщика
     """
 
+    permission_classes = [IsShop]
+
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse(
-                {"Status": False, "Error": "Log in required"}, status=403
-            )
-
-        if request.user.type != "shop":
-            return JsonResponse(
-                {"Status": False, "Error": "Только для магазинов"}, status=403
-            )
-
         url = request.data.get("url")
         if not url:
             return JsonResponse(
