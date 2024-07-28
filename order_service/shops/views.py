@@ -109,3 +109,11 @@ class PartnerState(APIView):
         shop = request.user.shop
         serializer = ShopSerializer(shop)
         return Response(serializer.data)
+    
+    def post(self, request):
+        shop = request.user.shop
+        serializer = ShopSerializer(shop, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
