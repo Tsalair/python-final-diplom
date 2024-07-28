@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.http import JsonResponse
 from rest_framework import generics
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
@@ -99,3 +100,12 @@ class ProductInfoList(generics.ListAPIView):
             queryset = queryset.filter(product__category_id=category_id)
 
         return queryset
+
+
+class PartnerState(APIView):
+    permission_classes = [IsShop]
+
+    def get(self, request):
+        shop = request.user.shop
+        serializer = ShopSerializer(shop)
+        return Response(serializer.data)
