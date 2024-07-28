@@ -98,6 +98,9 @@ class ProductInfo(models.Model):
             ),
         ]
 
+    def __str__(self):
+        return self.model
+
 
 class Parameter(models.Model):
     name = models.CharField(verbose_name="Название", max_length=40, unique=True)

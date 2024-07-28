@@ -14,7 +14,7 @@ from .models import (
     ProductInfoParameter,
     Shop,
 )
-from .serializers import ShopSerializer
+from .serializers import ShopSerializer, ProductInfoSerializer
 
 
 class PartnerUpdate(APIView):
@@ -90,3 +90,19 @@ class PartnerUpdate(APIView):
 class ShopList(generics.ListAPIView):
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
+
+
+class ProductInfoList(generics.ListAPIView):
+    serializer_class = ProductInfoSerializer
+
+    def get_queryset(self):
+        queryset = ProductInfo.objects.prefetch_related("product__category", "shop")
+        shop_id = self.request.query_params.get("shop_id")
+        category_id = self.request.query_params.get("category_id")
+
+        if shop_id is not None:
+            queryset = queryset.filter(shop_id=shop_id)
+        if category_id is not None:
+            queryset = queryset.filter(product__category_id=category_id)
+
+        return queryset
