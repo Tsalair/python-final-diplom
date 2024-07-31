@@ -16,7 +16,7 @@ from .models import (
     Shop,
 )
 from .permissions import IsShop
-from .serializers import ProductInfoSerializer, ShopSerializer
+from .serializers import ProductInfoSerializer, ShopSerializer, CategorySerializer
 
 
 class PartnerUpdate(APIView):
@@ -86,6 +86,11 @@ class ShopList(generics.ListAPIView):
     serializer_class = ShopSerializer
 
 
+class CategoryList(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
 class ProductInfoList(generics.ListAPIView):
     serializer_class = ProductInfoSerializer
 
@@ -109,11 +114,10 @@ class PartnerState(APIView):
         shop = request.user.shop
         serializer = ShopSerializer(shop)
         return Response(serializer.data)
-    
+
     def post(self, request):
         shop = request.user.shop
         serializer = ShopSerializer(shop, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-

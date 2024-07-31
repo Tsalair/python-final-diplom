@@ -7,5 +7,6 @@ urlpatterns = [
     path("partner/state", views.PartnerState.as_view()),
     path('shops/', views.ShopList.as_view()),
     path('products/', views.ProductInfoList.as_view()),
+    path('categories', views.CategoryList.as_view()),
 ]
 
