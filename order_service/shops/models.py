@@ -162,7 +162,7 @@ class Order(models.Model):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return str(self.dt)
+        return str(self.created_at)
 
 
 class OrderItem(models.Model):
