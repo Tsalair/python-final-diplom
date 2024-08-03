@@ -77,6 +77,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_info = ProductInfoSerializer()
+    total = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = OrderItem
@@ -84,4 +85,5 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "id",
             "product_info",
             "quantity",
+            "total",
         ]

@@ -191,3 +191,7 @@ class OrderItem(models.Model):
                 fields=["order_id", "product_info"], name="unique_order_item"
             ),
         ]
+
+    @property
+    def total(self):
+        return self.quantity * self.product_info.price
