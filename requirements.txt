@@ -13,7 +13,10 @@ charset-normalizer==3.3.2
 django==5.0.7
     # via
     #   -r requirements.in
+    #   django-debug-toolbar
     #   djangorestframework
+django-debug-toolbar==4.4.6
+    # via -r requirements.in
 djangorestframework==3.15.2
     # via -r requirements.in
 idna==3.7
@@ -23,7 +26,9 @@ pyyaml==6.0.1
 requests==2.32.3
     # via -r requirements.in
 sqlparse==0.5.1
-    # via django
+    # via
+    #   django
+    #   django-debug-toolbar
 tzdata==2024.1
     # via django
 urllib3==2.2.2

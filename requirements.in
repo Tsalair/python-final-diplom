@@ -2,3 +2,4 @@ Django
 requests
 PyYAML
 djangorestframework
+django-debug-toolbar
