@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from .models import Product, ProductInfo, Shop, Category
+from .models import Product, ProductInfo, Shop, Category, Order, OrderItem
 
 
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         fields = ["id", "name", "url", "user", "is_accepting_orders"]
-        read_only_fields = ["id", 'name', "url", "user"]
+        read_only_fields = ["id", "name", "url", "user"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -39,4 +39,49 @@ class ProductInfoSerializer(serializers.ModelSerializer):
             "quantity",
             "price",
             "price_rrc",
+        ]
+
+
+class BasketAddItemSerializer(serializers.Serializer):
+    product_info = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class BasketAddSerializer(serializers.Serializer):
+    items = BasketAddItemSerializer(many=True)
+
+
+class BasketUpdateItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class BasketUpdateSerializer(serializers.Serializer):
+    items = BasketUpdateItemSerializer(many=True)
+
+
+class BasketDeleteSerializer(serializers.Serializer):
+    items = serializers.ListField(child=serializers.IntegerField(min_value=1))
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "created_at",
+            "state",
+            "contact",
+        ]
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_info = ProductInfoSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = [
+            "id",
+            "product_info",
+            "quantity",
         ]

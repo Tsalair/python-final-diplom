@@ -2,21 +2,33 @@ import requests
 import yaml
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
+from django.db.models import F
 from django.http import JsonResponse
 from rest_framework import generics
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
     Category,
+    Order,
+    OrderItem,
     Parameter,
     Product,
     ProductInfo,
     ProductInfoParameter,
     Shop,
 )
-from .permissions import IsShop
-from .serializers import ProductInfoSerializer, ShopSerializer, CategorySerializer
+from .permissions import IsBuyer, IsShop
+from .serializers import (
+    BasketAddSerializer,
+    BasketDeleteSerializer,
+    BasketUpdateSerializer,
+    CategorySerializer,
+    ProductInfoSerializer,
+    ShopSerializer,
+    OrderItemSerializer,
+)
 
 
 class PartnerUpdate(APIView):
@@ -121,3 +133,83 @@ class PartnerState(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class Basket(APIView):
+    permission_classes = [IsBuyer]
+
+    def _get_order_items(self, basket):
+        order_items = basket.ordered_items.prefetch_related(
+            "product_info__product__category", "product_info__shop"
+        )
+        serializer = OrderItemSerializer(order_items, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        basket, _ = request.user.orders.get_or_create(state="basket")
+
+        serializer = BasketAddSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        for order_item in data["items"]:
+            product_info_id = order_item["product_info"]
+            if not ProductInfo.objects.filter(id=product_info_id).exists():
+                raise ParseError(f"Product info {product_info_id} does not exist")
+
+            order_item, _ = basket.ordered_items.update_or_create(
+                product_info_id=product_info_id,
+                create_defaults={"quantity": order_item["quantity"]},
+                defaults={"quantity": F("quantity") + order_item["quantity"]},
+            )
+
+        return self._get_order_items(basket)
+
+    def put(self, request):
+        try:
+            basket = request.user.orders.get(state="basket")
+        except Order.DoesNotExist:
+            raise ParseError("Basket does not exist")
+
+        serializer = BasketUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        for order_item in data["items"]:
+            try:
+                order_item_object = basket.ordered_items.get(id=order_item["id"])
+            except OrderItem.DoesNotExist:
+                raise ParseError(f"Order item {order_item['id']} does not exist")
+
+            order_item_object.quantity = order_item["quantity"]
+            order_item_object.save()
+
+        return self._get_order_items(basket)
+
+    def get(self, request):
+        try:
+            basket = request.user.orders.get(state="basket")
+        except Order.DoesNotExist:
+            raise ParseError("Basket does not exist")
+
+        return self._get_order_items(basket)
+
+    def delete(self, request):
+        try:
+            basket = request.user.orders.get(state="basket")
+        except Order.DoesNotExist:
+            raise ParseError("Basket does not exist")
+
+        serializer = BasketDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        for order_item in data["items"]:
+            try:
+                order_item_object = basket.ordered_items.get(id=order_item)
+            except OrderItem.DoesNotExist:
+                raise ParseError(f"Order item {order_item} does not exist")
+
+            order_item_object.delete()
+
+        return self._get_order_items(basket)
