@@ -3,3 +3,4 @@ requests
 PyYAML
 djangorestframework
 django-debug-toolbar
+python-dotenv
