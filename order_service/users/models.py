@@ -1,8 +1,5 @@
+from authemail.models import EmailAbstractUser, EmailUserManager
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import BaseUserManager
-from authemail.models import EmailUserManager, EmailAbstractUser
 
 USER_TYPE_CHOICES = (
     ("shop", "Магазин"),
@@ -45,16 +42,6 @@ class User(EmailAbstractUser):
     objects = EmailUserManager()
     company = models.CharField(verbose_name="Компания", max_length=40, blank=True)
     position = models.CharField(verbose_name="Должность", max_length=40, blank=True)
-    username_validator = UnicodeUsernameValidator()
-    username = models.CharField(
-        verbose_name="Имя пользователя",
-        max_length=150,
-        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-        validators=[username_validator],
-        error_messages={
-            "unique": "A user with that username already exists.",
-        },
-    )
     type = models.CharField(
         verbose_name="Тип пользователя",
         choices=USER_TYPE_CHOICES,
