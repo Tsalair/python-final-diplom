@@ -44,5 +44,5 @@ urlpatterns = [
         authemail.views.PasswordChange.as_view(),
         name="authemail-password-change",
     ),
-    path("user/details", authemail.views.UserMe.as_view(), name="authemail-me"),
+    path("user/details", views.UserDetail.as_view()),    
 ]
