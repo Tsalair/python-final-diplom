@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "debug_toolbar",
+    'authemail',
 ]
 
 MIDDLEWARE = [
@@ -148,7 +149,8 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-
+EMAIL_FROM = getenv('AUTHEMAIL_DEFAULT_EMAIL_FROM')
+EMAIL_BCC = getenv('AUTHEMAIL_DEFAULT_EMAIL_BCC')
 EMAIL_HOST = getenv("EMAIL_HOST")
 EMAIL_PORT = int(getenv("EMAIL_PORT"))
 EMAIL_USE_SSL = bool(getenv("EMAIL_USE_SSL"))

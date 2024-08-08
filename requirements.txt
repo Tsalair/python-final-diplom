@@ -14,19 +14,30 @@ django==5.0.7
     # via
     #   -r requirements.in
     #   django-debug-toolbar
+    #   django-rest-authemail
     #   djangorestframework
 django-debug-toolbar==4.4.6
     # via -r requirements.in
-djangorestframework==3.15.2
+django-ipware==7.0.1
+    # via django-rest-authemail
+django-rest-authemail==2.1.7
     # via -r requirements.in
+djangorestframework==3.15.2
+    # via
+    #   -r requirements.in
+    #   django-rest-authemail
 idna==3.7
     # via requests
 python-dotenv==1.0.1
     # via -r requirements.in
+python-ipware==3.0.0
+    # via django-ipware
 pyyaml==6.0.1
     # via -r requirements.in
 requests==2.32.3
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   django-rest-authemail
 sqlparse==0.5.1
     # via
     #   django
