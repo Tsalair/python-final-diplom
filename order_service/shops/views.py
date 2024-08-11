@@ -1,8 +1,9 @@
 import requests
 import yaml
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.core.validators import URLValidator
-from django.db.models import F
+from django.db.models import F, Sum
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
@@ -25,9 +26,10 @@ from .serializers import (
     BasketDeleteSerializer,
     BasketUpdateSerializer,
     CategorySerializer,
+    OrderItemSerializer,
+    OrderSerializer,
     ProductInfoSerializer,
     ShopSerializer,
-    OrderItemSerializer,
 )
 
 
@@ -213,3 +215,39 @@ class Basket(APIView):
             order_item_object.delete()
 
         return self._get_order_items(basket)
+
+
+class Orders(APIView):
+    permission_classes = [IsBuyer]
+
+    def post(self, request):
+        try:
+            order = request.user.orders.annotate(
+                total=Sum(
+                    F("ordered_items__product_info__price")
+                    * F("ordered_items__quantity")
+                )
+            ).get(state="basket")
+
+        except Order.DoesNotExist:
+            raise ParseError("Basket does not exist")
+
+        serializer = OrderSerializer(order, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        contact = serializer.validated_data["contact"]
+        
+        if contact.user_id != request.user.id:
+            raise ParseError("Contact does not exist")
+        serializer.save(state="new")
+
+        send_mail("New order", "Thank you for your order!", None, [request.user.email])
+        return Response(OrderSerializer(order).data)
+
+    def get(self, request):
+        orders = request.user.orders.exclude(state="basket").annotate(
+            total=Sum(
+                F("ordered_items__product_info__price") * F("ordered_items__quantity")
+            )
+        )
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)

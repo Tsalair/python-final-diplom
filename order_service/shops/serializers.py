@@ -65,6 +65,8 @@ class BasketDeleteSerializer(serializers.Serializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    total = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Order
         fields = [
@@ -72,8 +74,9 @@ class OrderSerializer(serializers.ModelSerializer):
             "created_at",
             "state",
             "contact",
+            "total",
         ]
-
+        read_only_fields = ["id", "created_at", "state", "total"]
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_info = ProductInfoSerializer()

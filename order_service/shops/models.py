@@ -4,11 +4,6 @@ from order_service.users.models import User, Contact
 STATE_CHOICES = (
     ("basket", "Статус корзины"),
     ("new", "Новый"),
-    ("confirmed", "Подтвержден"),
-    ("assembled", "Собран"),
-    ("sent", "Отправлен"),
-    ("delivered", "Доставлен"),
-    ("canceled", "Отменен"),
 )
 
 
