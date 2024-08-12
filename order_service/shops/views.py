@@ -30,6 +30,7 @@ from .serializers import (
     OrderSerializer,
     ProductInfoSerializer,
     ShopSerializer,
+    OrderCreateSerializer,
 )
 
 
@@ -222,17 +223,25 @@ class Orders(APIView):
 
     def post(self, request):
         try:
-            order = request.user.orders.annotate(
-                total=Sum(
-                    F("ordered_items__product_info__price")
-                    * F("ordered_items__quantity")
+            order = (
+                request.user.orders.prefetch_related(
+                    "ordered_items__product_info__shop",
+                    "ordered_items__product_info__product__category",
+                    "contact",
                 )
-            ).get(state="basket")
+                .annotate(
+                    total=Sum(
+                        F("ordered_items__product_info__price")
+                        * F("ordered_items__quantity")
+                    )
+                )
+                .get(state="basket")
+            )
 
         except Order.DoesNotExist:
             raise ParseError("Basket does not exist")
 
-        serializer = OrderSerializer(order, data=request.data)
+        serializer = OrderCreateSerializer(order, data=request.data)
         serializer.is_valid(raise_exception=True)
         contact = serializer.validated_data["contact"]
 
@@ -244,9 +253,18 @@ class Orders(APIView):
         return Response(OrderSerializer(order).data)
 
     def get(self, request):
-        orders = request.user.orders.exclude(state="basket").annotate(
-            total=Sum(
-                F("ordered_items__product_info__price") * F("ordered_items__quantity")
+        orders = (
+            request.user.orders.exclude(state="basket")
+            .prefetch_related(
+                "ordered_items__product_info__shop",
+                "ordered_items__product_info__product__category",
+                "contact",
+            )
+            .annotate(
+                total=Sum(
+                    F("ordered_items__product_info__price")
+                    * F("ordered_items__quantity")
+                )
             )
         )
         serializer = OrderSerializer(orders, many=True)
@@ -260,6 +278,11 @@ class PartnerOrders(APIView):
         orders = (
             Order.objects.filter(ordered_items__product_info__shop=request.user.shop)
             .exclude(state="basket")
+            .prefetch_related(
+                "ordered_items__product_info__shop",
+                "ordered_items__product_info__product__category",
+                "contact",
+            )
             .annotate(
                 total=Sum(
                     F("ordered_items__product_info__price")

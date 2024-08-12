@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Product, ProductInfo, Shop, Category, Order, OrderItem
+from order_service.users.serializers import ContactSerializer
 
 
 class ShopSerializer(serializers.ModelSerializer):
@@ -64,20 +65,6 @@ class BasketDeleteSerializer(serializers.Serializer):
     items = serializers.ListField(child=serializers.IntegerField(min_value=1))
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    total = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Order
-        fields = [
-            "id",
-            "created_at",
-            "state",
-            "contact",
-            "total",
-        ]
-        read_only_fields = ["id", "created_at", "state", "total"]
-
 class OrderItemSerializer(serializers.ModelSerializer):
     product_info = ProductInfoSerializer()
     total = serializers.IntegerField(read_only=True)
@@ -90,3 +77,27 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "quantity",
             "total",
         ]
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    total = serializers.IntegerField(read_only=True)
+    ordered_items = OrderItemSerializer(many=True, read_only=True)
+    contact = ContactSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "created_at",
+            "state",
+            "contact",
+            "total",
+            "ordered_items",
+        ]
+        read_only_fields = ["id", "created_at", "state", "total"]
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["contact"]
