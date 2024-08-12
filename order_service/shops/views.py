@@ -235,7 +235,7 @@ class Orders(APIView):
         serializer = OrderSerializer(order, data=request.data)
         serializer.is_valid(raise_exception=True)
         contact = serializer.validated_data["contact"]
-        
+
         if contact.user_id != request.user.id:
             raise ParseError("Contact does not exist")
         serializer.save(state="new")
@@ -247,6 +247,24 @@ class Orders(APIView):
         orders = request.user.orders.exclude(state="basket").annotate(
             total=Sum(
                 F("ordered_items__product_info__price") * F("ordered_items__quantity")
+            )
+        )
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+
+class PartnerOrders(APIView):
+    permission_classes = [IsShop]
+
+    def get(self, request):
+        orders = (
+            Order.objects.filter(ordered_items__product_info__shop=request.user.shop)
+            .exclude(state="basket")
+            .annotate(
+                total=Sum(
+                    F("ordered_items__product_info__price")
+                    * F("ordered_items__quantity")
+                )
             )
         )
         serializer = OrderSerializer(orders, many=True)
