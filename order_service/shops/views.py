@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.core.validators import URLValidator
 from django.db.models import F, Sum
 from django.http import JsonResponse
+from django.template import loader
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -26,11 +27,11 @@ from .serializers import (
     BasketDeleteSerializer,
     BasketUpdateSerializer,
     CategorySerializer,
+    OrderCreateSerializer,
     OrderItemSerializer,
     OrderSerializer,
     ProductInfoSerializer,
     ShopSerializer,
-    OrderCreateSerializer,
 )
 
 
@@ -249,7 +250,10 @@ class Orders(APIView):
             raise ParseError("Contact does not exist")
         serializer.save(state="new")
 
-        send_mail("New order", "Thank you for your order!", None, [request.user.email])
+        template = loader.get_template("shops/new_order_email.txt")
+        context = {"order": order}
+        send_mail("New order", template.render(context), None, [request.user.email])
+
         return Response(OrderSerializer(order).data)
 
     def get(self, request):
