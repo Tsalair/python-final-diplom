@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "debug_toolbar",
-    'authemail',
+    "authemail",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -142,15 +143,16 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    ]
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-EMAIL_FROM = getenv('AUTHEMAIL_DEFAULT_EMAIL_FROM')
-EMAIL_BCC = getenv('AUTHEMAIL_DEFAULT_EMAIL_BCC')
+EMAIL_FROM = getenv("AUTHEMAIL_DEFAULT_EMAIL_FROM")
+EMAIL_BCC = getenv("AUTHEMAIL_DEFAULT_EMAIL_BCC")
 EMAIL_HOST = getenv("EMAIL_HOST")
 EMAIL_PORT = int(getenv("EMAIL_PORT", 465))
 EMAIL_USE_SSL = bool(getenv("EMAIL_USE_SSL", True))
@@ -158,3 +160,8 @@ EMAIL_HOST_USER = getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = getenv("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = getenv("SERVER_EMAIL")
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Order Service API",
+    "DESCRIPTION": "API for Order Service",
+    "VERSION": "1.0.0",
+}

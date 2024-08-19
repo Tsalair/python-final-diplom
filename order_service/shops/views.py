@@ -36,9 +36,7 @@ from .serializers import (
 
 
 class PartnerUpdate(APIView):
-    """
-    Класс для обновления прайса от поставщика
-    """
+    """Обновление прайса поставщика"""
 
     permission_classes = [IsShop]
 
@@ -98,16 +96,22 @@ class PartnerUpdate(APIView):
 
 
 class ShopList(generics.ListAPIView):
+    """Получение списка магазинов"""
+
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
 
 
 class CategoryList(generics.ListAPIView):
+    """Получение списка категорий"""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class ProductInfoList(generics.ListAPIView):
+    """Получение информации о товарах"""
+
     serializer_class = ProductInfoSerializer
 
     def get_queryset(self):
@@ -127,11 +131,15 @@ class PartnerState(APIView):
     permission_classes = [IsShop]
 
     def get(self, request):
+        """Получение информации о поставщике"""
+
         shop = request.user.shop
         serializer = ShopSerializer(shop)
         return Response(serializer.data)
 
     def post(self, request):
+        """Изменение статуса приёма заказов"""
+
         shop = request.user.shop
         serializer = ShopSerializer(shop, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -140,6 +148,8 @@ class PartnerState(APIView):
 
 
 class Basket(APIView):
+    """Работа с корзиной"""
+
     permission_classes = [IsBuyer]
 
     def _get_order_items(self, basket):
@@ -150,6 +160,8 @@ class Basket(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """Добавление товаров в корзину"""
+
         basket, _ = request.user.orders.get_or_create(state="basket")
 
         serializer = BasketAddSerializer(data=request.data)
@@ -170,6 +182,8 @@ class Basket(APIView):
         return self._get_order_items(basket)
 
     def put(self, request):
+        """Изменение количества товаров в корзине"""
+
         try:
             basket = request.user.orders.get(state="basket")
         except Order.DoesNotExist:
@@ -191,6 +205,8 @@ class Basket(APIView):
         return self._get_order_items(basket)
 
     def get(self, request):
+        """Получение информации о содержимом корзины"""
+
         try:
             basket = request.user.orders.get(state="basket")
         except Order.DoesNotExist:
@@ -199,6 +215,8 @@ class Basket(APIView):
         return self._get_order_items(basket)
 
     def delete(self, request):
+        """Удаление товаров из корзины"""
+
         try:
             basket = request.user.orders.get(state="basket")
         except Order.DoesNotExist:
@@ -223,6 +241,8 @@ class Orders(APIView):
     permission_classes = [IsBuyer]
 
     def post(self, request):
+        """Создание заказа"""
+
         try:
             order = (
                 request.user.orders.prefetch_related(
@@ -257,6 +277,8 @@ class Orders(APIView):
         return Response(OrderSerializer(order).data)
 
     def get(self, request):
+        """Получение информации о заказах"""
+
         orders = (
             request.user.orders.exclude(state="basket")
             .prefetch_related(
@@ -279,6 +301,8 @@ class PartnerOrders(APIView):
     permission_classes = [IsShop]
 
     def get(self, request):
+        """Получение информации о заказах, содержащих товары поставщика"""
+
         orders = (
             Order.objects.filter(ordered_items__product_info__shop=request.user.shop)
             .exclude(state="basket")
